@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { Scissors, Calendar } from "lucide-react";
+import { getCurrentUser } from "@/lib/supabase/auth";
+import UserMenuDropdown from "./UserMenuDropdown";
 
-export default function Navbar() {
+export default async function Navbar() {
+  const authData = await getCurrentUser();
+
   return (
     <header className="sticky top-0 z-50 bg-zinc-950/90 backdrop-blur-md border-b border-zinc-800/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
@@ -36,17 +40,22 @@ export default function Navbar() {
           </a>
         </nav>
 
-        {/* Action CTAs */}
-        <div className="flex items-center gap-1.5 sm:gap-3">
-          <Link
-            href="/login"
-            className="text-xs sm:text-sm font-medium text-zinc-300 hover:text-white px-2.5 py-1.5 transition-colors"
-          >
-            Sign In
-          </Link>
+        {/* Action CTAs / User State */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {authData?.user ? (
+            <UserMenuDropdown user={authData.user} profile={authData.profile} />
+          ) : (
+            <Link
+              href="/login"
+              className="text-xs sm:text-sm font-semibold text-zinc-300 hover:text-amber-400 px-3 py-2 transition-colors"
+            >
+              Sign In
+            </Link>
+          )}
+
           <Link
             href="/book"
-            className="inline-flex items-center gap-1.5 sm:gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-zinc-950 font-bold px-3 sm:px-5 py-1.5 sm:py-2.5 rounded-lg sm:rounded-xl shadow-md shadow-amber-500/20 hover:shadow-amber-500/30 active:scale-95 transition-all text-xs sm:text-sm"
+            className="inline-flex items-center gap-1.5 sm:gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-zinc-950 font-bold px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl shadow-md shadow-amber-500/20 hover:shadow-amber-500/30 active:scale-95 transition-all text-xs sm:text-sm"
           >
             <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span className="sm:hidden">Book</span>
@@ -57,3 +66,4 @@ export default function Navbar() {
     </header>
   );
 }
+

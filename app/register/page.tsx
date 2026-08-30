@@ -1,64 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  Scissors,
-  User,
-  Mail,
-  Phone,
-  Lock,
-  ArrowRight,
-  ArrowLeft,
-  MessageCircle,
-  ShieldCheck,
-  Eye,
-  EyeOff,
-  Loader2,
-  AlertCircle,
-} from "lucide-react";
+import { Scissors, User, Mail, Phone, Lock, ArrowRight, ArrowLeft, MessageCircle, ShieldCheck, Eye, EyeOff, Loader2, AlertCircle, } from "lucide-react";
 import { SUPPORTED_COUNTRIES } from "@/lib/countries";
+
+interface RegisterFormState {
+  errors?: Record<string, string>;
+  serverError?: string | null;
+}
 
 export default function RegisterPage() {
   const router = useRouter();
 
-  // Form State
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    countryCode: "+389",
-    phone: "",
-    password: "",
-    confirmPassword: "",
-  });
-
-  // UI State
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [serverError, setServerError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Field change handler
-  const handleChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors((prev) => {
-        const next = { ...prev };
-        delete next[field];
-        return next;
-      });
-    }
-    if (serverError) setServerError(null);
-  };
-
-  // Form submission (handled by /auth/register backend route)
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrors({});
-    setServerError(null);
-    setIsLoading(true);
+  // Action function passed to useActionState that calls /auth/register API route
+  const registerAction = async (
+    _prevState: RegisterFormState | null,
+    formData: FormData
+  ): Promise<RegisterFormState> => {
+    const rawData = {
+      fullName: (formData.get("fullName") as string)?.trim() || "",
+      email: (formData.get("email") as string)?.trim() || "",
+      countryCode: (formData.get("countryCode") as string)?.trim() || "+389",
+      phone: (formData.get("phone") as string)?.trim() || "",
+      password: (formData.get("password") as string) || "",
+      confirmPassword: (formData.get("confirmPassword") as string) || "",
+    };
 
     try {
       const response = await fetch("/auth/register", {
@@ -66,34 +34,46 @@ export default function RegisterPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(rawData),
       });
 
       const data = await response.json();
 
       if (!response.ok || data.error) {
         if (data.field) {
-          setErrors({ [data.field]: data.error });
-        } else {
-          setServerError(
-            data.error || "Failed to create account. Please try again."
-          );
+          return { errors: { [data.field]: data.error } };
         }
-        setIsLoading(false);
-        return;
+        return {
+          serverError:
+            data.error || "Failed to create account. Please try again.",
+        };
       }
 
       if (data.success && data.redirectTo) {
         router.push(data.redirectTo);
       }
+
+      return {};
     } catch (err: unknown) {
       console.error("Registration error:", err);
-      setServerError(
-        "A network error occurred. Please check your connection and try again."
-      );
-      setIsLoading(false);
+      return {
+        serverError:
+          "A network error occurred. Please check your connection and try again.",
+      };
     }
   };
+
+  const [state, formAction, isPending] = useActionState<
+    RegisterFormState | null,
+    FormData
+  >(registerAction, null);
+
+  // UI state for password visibility toggles
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const errors = state?.errors || {};
+  const serverError = state?.serverError;
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col justify-between relative overflow-hidden">
@@ -135,7 +115,7 @@ export default function RegisterPage() {
 
           {/* Form Card */}
           <div className="bg-zinc-900/90 backdrop-blur-xl border border-zinc-800 rounded-2xl p-6 sm:p-8 shadow-2xl shadow-black/80">
-            <form onSubmit={handleSubmit} noValidate className="space-y-4">
+            <form action={formAction} noValidate className="space-y-4">
               {/* General Server Error Banner */}
               {serverError && (
                 <div className="p-3.5 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-300 flex items-start gap-2.5">
@@ -146,7 +126,10 @@ export default function RegisterPage() {
 
               {/* Full Name Field */}
               <div>
-                <label className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-1.5">
+                <label
+                  htmlFor="fullName"
+                  className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-1.5"
+                >
                   Full Name
                 </label>
                 <div className="relative">
@@ -154,16 +137,15 @@ export default function RegisterPage() {
                     <User className="w-4 h-4" />
                   </div>
                   <input
+                    id="fullName"
+                    name="fullName"
                     type="text"
                     placeholder="e.g. Alex Smith"
-                    value={formData.fullName}
-                    onChange={(e) => handleChange("fullName", e.target.value)}
-                    disabled={isLoading}
-                    className={`w-full bg-zinc-950 border rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none transition-all ${
-                      errors.fullName
-                        ? "border-red-500/60 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                        : "border-zinc-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
-                    }`}
+                    disabled={isPending}
+                    className={`w-full bg-zinc-950 border rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none transition-all ${errors.fullName
+                      ? "border-red-500/60 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                      : "border-zinc-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
+                      }`}
                   />
                 </div>
                 {errors.fullName && (
@@ -176,7 +158,10 @@ export default function RegisterPage() {
 
               {/* Email Address Field */}
               <div>
-                <label className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-1.5">
+                <label
+                  htmlFor="email"
+                  className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-1.5"
+                >
                   Email Address
                 </label>
                 <div className="relative">
@@ -184,16 +169,15 @@ export default function RegisterPage() {
                     <Mail className="w-4 h-4" />
                   </div>
                   <input
+                    id="email"
+                    name="email"
                     type="email"
                     placeholder="you@example.com"
-                    value={formData.email}
-                    onChange={(e) => handleChange("email", e.target.value)}
-                    disabled={isLoading}
-                    className={`w-full bg-zinc-950 border rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none transition-all ${
-                      errors.email
-                        ? "border-red-500/60 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                        : "border-zinc-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
-                    }`}
+                    disabled={isPending}
+                    className={`w-full bg-zinc-950 border rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none transition-all ${errors.email
+                      ? "border-red-500/60 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                      : "border-zinc-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
+                      }`}
                   />
                 </div>
                 {errors.email && (
@@ -207,7 +191,10 @@ export default function RegisterPage() {
               {/* Phone Number Field (With WhatsApp Notification note) */}
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider">
+                  <label
+                    htmlFor="phone"
+                    className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider"
+                  >
                     Phone Number
                   </label>
                   <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-400">
@@ -217,9 +204,10 @@ export default function RegisterPage() {
                 <div className="flex gap-2">
                   {/* Country Selector */}
                   <select
-                    value={formData.countryCode}
-                    onChange={(e) => handleChange("countryCode", e.target.value)}
-                    disabled={isLoading}
+                    id="countryCode"
+                    name="countryCode"
+                    defaultValue="+389"
+                    disabled={isPending}
                     className="bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-3 text-sm text-zinc-200 focus:outline-none focus:border-amber-500 transition-all font-mono max-w-[145px] sm:max-w-[165px]"
                   >
                     {SUPPORTED_COUNTRIES.map((country) => (
@@ -235,20 +223,15 @@ export default function RegisterPage() {
                       <Phone className="w-4 h-4" />
                     </div>
                     <input
+                      id="phone"
+                      name="phone"
                       type="tel"
-                      placeholder={
-                        formData.countryCode === "+389"
-                          ? "70 123 456"
-                          : "Phone digits"
-                      }
-                      value={formData.phone}
-                      onChange={(e) => handleChange("phone", e.target.value)}
-                      disabled={isLoading}
-                      className={`w-full bg-zinc-950 border rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none transition-all font-mono ${
-                        errors.phone
-                          ? "border-red-500/60 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                          : "border-zinc-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
-                      }`}
+                      placeholder="70 123 456"
+                      disabled={isPending}
+                      className={`w-full bg-zinc-950 border rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none transition-all font-mono ${errors.phone
+                        ? "border-red-500/60 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                        : "border-zinc-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
+                        }`}
                     />
                   </div>
                 </div>
@@ -268,7 +251,10 @@ export default function RegisterPage() {
               {/* Password & Confirm Password Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-1.5">
+                  <label
+                    htmlFor="password"
+                    className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-1.5"
+                  >
                     Password
                   </label>
                   <div className="relative">
@@ -276,16 +262,15 @@ export default function RegisterPage() {
                       <Lock className="w-4 h-4" />
                     </div>
                     <input
+                      id="password"
+                      name="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
-                      value={formData.password}
-                      onChange={(e) => handleChange("password", e.target.value)}
-                      disabled={isLoading}
-                      className={`w-full bg-zinc-950 border rounded-xl pl-10 pr-10 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none transition-all ${
-                        errors.password
-                          ? "border-red-500/60 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                          : "border-zinc-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
-                      }`}
+                      disabled={isPending}
+                      className={`w-full bg-zinc-950 border rounded-xl pl-10 pr-10 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none transition-all ${errors.password
+                        ? "border-red-500/60 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                        : "border-zinc-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
+                        }`}
                     />
                     <button
                       type="button"
@@ -309,7 +294,10 @@ export default function RegisterPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-1.5">
+                  <label
+                    htmlFor="confirmPassword"
+                    className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-1.5"
+                  >
                     Confirm Password
                   </label>
                   <div className="relative">
@@ -317,18 +305,15 @@ export default function RegisterPage() {
                       <Lock className="w-4 h-4" />
                     </div>
                     <input
+                      id="confirmPassword"
+                      name="confirmPassword"
                       type={showConfirmPassword ? "text" : "password"}
                       placeholder="••••••••"
-                      value={formData.confirmPassword}
-                      onChange={(e) =>
-                        handleChange("confirmPassword", e.target.value)
-                      }
-                      disabled={isLoading}
-                      className={`w-full bg-zinc-950 border rounded-xl pl-10 pr-10 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none transition-all ${
-                        errors.confirmPassword
-                          ? "border-red-500/60 focus:border-red-500 focus:ring-1 focus:ring-red-500"
-                          : "border-zinc-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
-                      }`}
+                      disabled={isPending}
+                      className={`w-full bg-zinc-950 border rounded-xl pl-10 pr-10 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none transition-all ${errors.confirmPassword
+                        ? "border-red-500/60 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                        : "border-zinc-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
+                        }`}
                     />
                     <button
                       type="button"
@@ -357,10 +342,10 @@ export default function RegisterPage() {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isPending}
                 className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 disabled:opacity-60 disabled:cursor-not-allowed text-zinc-950 font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-amber-500/20 active:scale-[0.98] transition-all text-sm mt-4 cursor-pointer"
               >
-                {isLoading ? (
+                {isPending ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
                     Creating account...

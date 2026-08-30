@@ -1,7 +1,63 @@
+"use client";
+
+import { useActionState, useState } from "react";
 import Link from "next/link";
-import { Scissors, Mail, Lock, ArrowRight, ArrowLeft, ShieldCheck, Sparkles } from "lucide-react";
+import { Scissors, Mail, Lock, ArrowRight, ArrowLeft, Sparkles, AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
+
+type ActionState = {
+  error?: string;
+  fields?: {
+    email?: string;
+  };
+};
+
+const initialState: ActionState = {
+  error: "",
+  fields: {
+    email: "",
+  },
+};
 
 export default function LoginPage() {
+  const [showPassword, setShowPassword] = useState(false);
+
+  async function handleLogin(
+    prevState: ActionState,
+    formData: FormData
+  ): Promise<ActionState> {
+    const email = (formData.get("email") as string) || "";
+
+    try {
+      const res = await fetch("/auth/login", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        return {
+          error: data.error || "Failed to sign in. Please try again.",
+          fields: { email },
+        };
+      }
+
+      if (data.redirectTo) {
+        window.location.href = data.redirectTo;
+      }
+
+      return {};
+    } catch (err) {
+      console.error("Sign in network error:", err);
+      return {
+        error: "Network error. Please check your connection and try again.",
+        fields: { email },
+      };
+    }
+  }
+
+  const [state, formAction, isPending] = useActionState(handleLogin, initialState);
+
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col justify-between relative overflow-hidden">
       {/* Background Ambient Glow */}
@@ -39,7 +95,15 @@ export default function LoginPage() {
 
           {/* Form Card */}
           <div className="bg-zinc-900/90 backdrop-blur-xl border border-zinc-800 rounded-2xl p-6 sm:p-8 shadow-2xl shadow-black/80">
-            <form className="space-y-5">
+            {/* Error Message Banner */}
+            {state?.error && (
+              <div className="mb-5 p-3.5 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3 text-red-400 text-xs sm:text-sm">
+                <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                <div className="flex-1 font-medium leading-snug">{state.error}</div>
+              </div>
+            )}
+
+            <form action={formAction} className="space-y-5">
               {/* Email Field */}
               <div>
                 <label className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-2">
@@ -50,9 +114,13 @@ export default function LoginPage() {
                     <Mail className="w-4 h-4" />
                   </div>
                   <input
+                    name="email"
                     type="email"
+                    required
+                    disabled={isPending}
+                    defaultValue={state?.fields?.email || ""}
                     placeholder="you@example.com"
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all"
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all disabled:opacity-50"
                   />
                 </div>
               </div>
@@ -63,32 +131,57 @@ export default function LoginPage() {
                   <label className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider">
                     Password
                   </label>
-                  <a
-                    href="#forgot-password"
+                  <Link
+                    href="/forgot-password"
                     className="text-xs font-medium text-amber-400 hover:text-amber-300 transition-colors"
                   >
                     Forgot password?
-                  </a>
+                  </Link>
                 </div>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
                     <Lock className="w-4 h-4" />
                   </div>
                   <input
-                    type="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    required
+                    disabled={isPending}
                     placeholder="••••••••"
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all"
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-11 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all disabled:opacity-50"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    tabIndex={-1}
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-zinc-500 hover:text-zinc-300 transition-colors"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
+                  </button>
                 </div>
               </div>
 
               {/* Sign In Button */}
               <button
-                type="button"
-                className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-zinc-950 font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-amber-500/20 active:scale-[0.98] transition-all text-sm mt-2"
+                type="submit"
+                disabled={isPending}
+                className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-zinc-950 font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-amber-500/20 active:scale-[0.98] transition-all text-sm mt-2 disabled:opacity-50 disabled:pointer-events-none"
               >
-                Sign In
-                <ArrowRight className="w-4 h-4" />
+                {isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  <>
+                    Sign In
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
               </button>
             </form>
 
@@ -135,3 +228,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

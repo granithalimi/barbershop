@@ -53,7 +53,6 @@ CREATE TABLE IF NOT EXISTS public.services (
     description TEXT,
     duration_minutes INTEGER NOT NULL CHECK (duration_minutes > 0),
     price NUMERIC(10, 2) NOT NULL CHECK (price >= 0),
-    is_active BOOLEAN NOT NULL DEFAULT true,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -338,11 +337,11 @@ CREATE POLICY "Admins can delete reviews"
 
 
 -- 6. SEED DATA (INITIAL SERVICES CATALOG)
-INSERT INTO public.services (name, description, duration_minutes, price, is_active)
+INSERT INTO public.services (name, description, duration_minutes, price)
 VALUES
-    ('Classic Haircut', 'Precision scissor and clipper cut, neckline cleanup, hot towel finish, and styling.', 30, 25.00, true),
-    ('Beard Trim & Lineup', 'Detailed beard shaping, electric trim, razor line edging, and beard oil application.', 20, 15.00, true),
-    ('Haircut & Beard Combo', 'Complete package: Custom haircut, styling, full beard trim, hot towel, and razor finish.', 45, 35.00, true),
-    ('Royal Hot Towel Shave', 'Traditional straight razor shave with warm lather, hot towels, and soothing balm.', 30, 20.00, true),
-    ('Kids / Senior Haircut', 'Gentle and stylish haircut for kids under 12 or seniors 65+.', 25, 20.00, true)
+    ('Classic Haircut', 'Precision scissor and clipper cut, neckline cleanup, hot towel finish, and styling.', 30, 25.00),
+    ('Beard Trim & Lineup', 'Detailed beard shaping, electric trim, razor line edging, and beard oil application.', 20, 15.00),
+    ('Haircut & Beard Combo', 'Complete package: Custom haircut, styling, full beard trim, hot towel, and razor finish.', 45, 35.00),
+    ('Royal Hot Towel Shave', 'Traditional straight razor shave with warm lather, hot towels, and soothing balm.', 30, 20.00),
+    ('Kids / Senior Haircut', 'Gentle and stylish haircut for kids under 12 or seniors 65+.', 25, 20.00)
 ON CONFLICT DO NOTHING;

@@ -1,15 +1,12 @@
 "use client";
 
 import {
-  Scissors,
   Calendar,
   Clock,
   User,
   ShieldCheck,
-  CreditCard,
-  Sparkles,
-  CheckCircle2,
   Banknote,
+  AlertCircle,
 } from "lucide-react";
 import type { MockBarber, MockService } from "@/lib/mock-booking-data";
 import type { CurrentUserProfile } from "@/lib/supabase/auth";
@@ -26,6 +23,7 @@ interface StepConfirmationProps {
   } | null;
   guestData: GuestData;
   isSubmitting: boolean;
+  error?: string | null;
   onConfirm: () => void;
 }
 
@@ -37,6 +35,7 @@ export default function StepConfirmation({
   currentUser,
   guestData,
   isSubmitting,
+  error,
   onConfirm,
 }: StepConfirmationProps) {
   const isLoggedIn = !!currentUser?.user;
@@ -67,6 +66,13 @@ export default function StepConfirmation({
           Please review your appointment summary before finalizing.
         </p>
       </div>
+
+      {error && (
+        <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center gap-2.5 text-xs text-red-400">
+          <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
+          <span>{error}</span>
+        </div>
+      )}
 
       {/* Receipt Breakdown Card */}
       <div className="bg-zinc-900/90 border border-zinc-800 rounded-2xl overflow-hidden shadow-xl">

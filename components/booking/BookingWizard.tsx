@@ -12,6 +12,8 @@ import StepContactDetails, { type GuestData } from "./StepContactDetails";
 import StepConfirmation from "./StepConfirmation";
 import StepBookingSuccess from "./StepBookingSuccess";
 
+import { createClient } from "@/lib/supabase/client";
+
 interface BookingWizardProps {
   currentUser?: {
     user: { id: string; email?: string } | null;
@@ -40,6 +42,7 @@ export default function BookingWizard({ currentUser = null }: BookingWizardProps
     phone: currentUser?.profile?.phone || "",
   });
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Step Handlers
   const handleSelectBarber = (barber: MockBarber) => {
@@ -78,14 +81,59 @@ export default function BookingWizard({ currentUser = null }: BookingWizardProps
     }
   };
 
-  const handleConfirmBooking = () => {
-    setIsSubmitting(true);
-    // Simulate instantaneous smooth submission
-    setTimeout(() => {
-      setIsSubmitting(false);
+  const handleConfirmBooking = async () => {
+    if (!selectedBarber || !selectedService || !selectedDate || !selectedTime) return;
+
+    try {
+      setIsSubmitting(true);
+      setSubmitError(null);
+
+      // Compute precise start_time and end_time
+      const [hours, mins] = selectedTime.split(":").map(Number);
+      const totalStartMins = hours * 60 + mins;
+      const totalEndMins = totalStartMins + (selectedService.durationMinutes || 30);
+
+      const endHours = Math.floor(totalEndMins / 60);
+      const endMins = totalEndMins % 60;
+
+      const startTimeFormatted = `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}:00`;
+      const endTimeFormatted = `${String(endHours).padStart(2, "0")}:${String(endMins).padStart(2, "0")}:00`;
+
+      const supabase = createClient();
+
+      const appointmentPayload = {
+        barber_id: selectedBarber.id,
+        service_id: selectedService.id,
+        client_id: currentUser?.user?.id || null,
+        guest_name: isLoggedIn ? null : (guestData.fullName || "Guest"),
+        guest_email: isLoggedIn ? null : (guestData.email || null),
+        guest_phone: isLoggedIn ? null : (`${guestData.countryCode}${guestData.phone}` || null),
+        appointment_date: selectedDate,
+        start_time: startTimeFormatted,
+        end_time: endTimeFormatted,
+        status: "pending",
+        payment_method: "cash",
+        total_price: selectedService.priceEur,
+        notes: null,
+      };
+
+      const { error } = await supabase
+        .from("appointments")
+        .insert([appointmentPayload]);
+
+      if (error) {
+        throw error;
+      }
+
       setCurrentStep(6);
       window.scrollTo({ top: 0, behavior: "smooth" });
-    }, 900);
+    } catch (err: unknown) {
+      console.error("Error creating appointment:", err);
+      const errorMessage = err instanceof Error ? err.message : "Failed to book appointment. Please try again.";
+      setSubmitError(errorMessage);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleResetBooking = () => {
@@ -93,6 +141,7 @@ export default function BookingWizard({ currentUser = null }: BookingWizardProps
     setSelectedBarber(null);
     setSelectedService(null);
     setSelectedTime("10:30");
+    setSubmitError(null);
     setGuestData({
       fullName: "",
       email: "",
@@ -191,6 +240,8 @@ export default function BookingWizard({ currentUser = null }: BookingWizardProps
 
         {currentStep === 3 && (
           <StepDateTimeSelect
+            barber={selectedBarber}
+            service={selectedService}
             selectedDate={selectedDate}
             selectedTime={selectedTime}
             onSelectDate={setSelectedDate}
@@ -215,6 +266,7 @@ export default function BookingWizard({ currentUser = null }: BookingWizardProps
             currentUser={currentUser}
             guestData={guestData}
             isSubmitting={isSubmitting}
+            error={submitError}
             onConfirm={handleConfirmBooking}
           />
         )}

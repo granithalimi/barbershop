@@ -291,11 +291,7 @@ CREATE POLICY "Admins and barbers can manage time off"
 DROP POLICY IF EXISTS "View appointments" ON public.appointments;
 CREATE POLICY "View appointments"
     ON public.appointments FOR SELECT
-    USING (
-        public.is_admin()
-        OR auth.uid() = barber_id
-        OR (auth.uid() IS NOT NULL AND auth.uid() = client_id)
-    );
+    USING (true);
 
 DROP POLICY IF EXISTS "Anyone can insert appointments (Guest & Client)" ON public.appointments;
 CREATE POLICY "Anyone can insert appointments (Guest & Client)"

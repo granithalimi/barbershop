@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { Calendar as CalendarIcon, Clock, Sun, Sunset, Moon, Loader2 } from "lucide-react";
+import { useState, useEffect, useMemo, useRef } from "react";
+import { Calendar as CalendarIcon, Clock, Sun, Sunset, Moon, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { type MockBarber, type MockService, type TimeSlot } from "@/lib/mock-booking-data";
 import { createClient } from "@/lib/supabase/client";
 
@@ -318,6 +318,15 @@ export default function StepDateTimeSelect({
   const afternoonSlots = slots.filter((s) => s.period === "afternoon");
   const eveningSlots = slots.filter((s) => s.period === "evening");
 
+  const dateScrollRef = useRef<HTMLDivElement>(null);
+
+  const scrollDates = (direction: "left" | "right") => {
+    if (dateScrollRef.current) {
+      const scrollAmount = direction === "left" ? -240 : 240;
+      dateScrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    }
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-200">
       <div className="text-center sm:text-left">
@@ -329,20 +338,40 @@ export default function StepDateTimeSelect({
         </p>
       </div>
 
-      {/* 1. Mobile-First Horizontal Date Strip */}
+      {/* 1. Mobile & Desktop Responsive Horizontal Date Strip */}
       <div>
         <div className="flex items-center justify-between mb-2.5">
           <label className="text-xs font-bold uppercase tracking-wider text-zinc-300 flex items-center gap-1.5">
             <CalendarIcon className="w-3.5 h-3.5 text-amber-400" />
             Select Day
           </label>
-          <span className="text-xs font-semibold text-amber-400">
-            {new Date(selectedDate).toLocaleDateString("en-US", {
-              weekday: "long",
-              month: "short",
-              day: "numeric",
-            })}
-          </span>
+          <div className="flex items-center gap-2">
+            <div className="hidden sm:flex items-center gap-1 mr-1">
+              <button
+                type="button"
+                onClick={() => scrollDates("left")}
+                aria-label="Previous dates"
+                className="p-1 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 hover:bg-zinc-800 transition cursor-pointer"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollDates("right")}
+                aria-label="Next dates"
+                className="p-1 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 hover:bg-zinc-800 transition cursor-pointer"
+              >
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+            <span className="text-xs font-semibold text-amber-400">
+              {new Date(selectedDate).toLocaleDateString("en-US", {
+                weekday: "long",
+                month: "short",
+                day: "numeric",
+              })}
+            </span>
+          </div>
         </div>
 
         {/* Scrollable Date Chips */}
@@ -352,7 +381,10 @@ export default function StepDateTimeSelect({
             <span className="text-xs">Checking barber schedule...</span>
           </div>
         ) : (
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 pt-1 scrollbar-none no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
+          <div
+            ref={dateScrollRef}
+            className="flex items-center gap-2 overflow-x-auto pb-3 pt-1 -mx-4 px-4 sm:mx-0 sm:px-0 scroll-smooth [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-zinc-900/50 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-zinc-700/60 hover:[&::-webkit-scrollbar-thumb]:bg-amber-500/50 [&::-webkit-scrollbar-thumb]:rounded-full [scrollbar-width:thin] [scrollbar-color:rgb(82_82_91_/_0.6)_transparent]"
+          >
             {availableDates.map((day) => {
               const isSelected = selectedDate === day.isoString;
               const isAvailable = day.isAvailable;

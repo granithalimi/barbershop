@@ -20,8 +20,6 @@ export interface BarberScheduleRecord {
   day_of_week: number; // 0=Sunday, 1=Monday... 6=Saturday
   start_time: string; // "HH:MM:SS" or "HH:MM"
   end_time: string;
-  break_start?: string | null;
-  break_end?: string | null;
   is_working: boolean;
 }
 
@@ -107,16 +105,14 @@ export default function StepDateTimeSelect({
       const monthName = d.toLocaleDateString("en-US", { month: "short" });
       const isoString = d.toISOString().split("T")[0];
 
-      // Check if barber works on this day of the week (strict matching)
-      let isWorkingDay = false;
-      if (schedules.length > 0) {
-        const scheduleForDay = schedules.find((s) => s.day_of_week === dayOfWeek);
-        // Only working if explicitly configured in barber_schedules with is_working = true
-        isWorkingDay = Boolean(scheduleForDay && scheduleForDay.is_working);
-      } else {
-        // Fallback default only when no schedule records exist at all in database: Sunday is off
-        isWorkingDay = dayOfWeek !== 0;
-      }
+      // Check if barber works on this day of the week (strict matching: only if configured with is_working = true)
+      const scheduleForDay = schedules.find((s) => s.day_of_week === dayOfWeek);
+      const isWorkingDay = Boolean(
+        scheduleForDay &&
+        scheduleForDay.is_working &&
+        scheduleForDay.start_time &&
+        scheduleForDay.end_time
+      );
 
       // Check if this date falls within a barber's vacation / time-off period
       const isOnTimeOff = timeOff.some(
@@ -217,24 +213,23 @@ export default function StepDateTimeSelect({
     );
     if (isOnTimeOff) return [];
 
-    // Find schedule for this day
+    // Find schedule for this day - return empty if no schedule or barber not working
     const scheduleForDay = schedules.find((s) => s.day_of_week === dayOfWeek);
-
-    // If schedules are configured in DB and no active schedule exists for today, return empty
-    if (schedules.length > 0 && (!scheduleForDay || !scheduleForDay.is_working)) {
+    if (
+      !scheduleForDay ||
+      !scheduleForDay.is_working ||
+      !scheduleForDay.start_time ||
+      !scheduleForDay.end_time
+    ) {
       return [];
     }
 
-    // Default fallback shift if no schedules exist at all in DB
-    const startStr = scheduleForDay ? scheduleForDay.start_time : "09:00:00";
-    const endStr = scheduleForDay ? scheduleForDay.end_time : "19:00:00";
-    const breakStartStr = scheduleForDay?.break_start;
-    const breakEndStr = scheduleForDay?.break_end;
+    const startMin = parseTimeToMinutes(scheduleForDay.start_time);
+    const endMin = parseTimeToMinutes(scheduleForDay.end_time);
 
-    const startMin = parseTimeToMinutes(startStr);
-    const endMin = parseTimeToMinutes(endStr);
-    const breakStartMin = breakStartStr ? parseTimeToMinutes(breakStartStr) : null;
-    const breakEndMin = breakEndStr ? parseTimeToMinutes(breakEndStr) : null;
+    if (startMin >= endMin) {
+      return [];
+    }
 
     const serviceDuration = service?.durationMinutes || 30;
     const stepInterval = 15; // 15-minute intervals
@@ -247,31 +242,29 @@ export default function StepDateTimeSelect({
     const isToday = selectedDate === todayIso;
     const currentMinToday = now.getHours() * 60 + now.getMinutes() + 15; // 15 min buffer
 
-    for (let currentSlotStart = startMin; currentSlotStart + serviceDuration <= endMin; currentSlotStart += stepInterval) {
+    for (let currentSlotStart = startMin; currentSlotStart < endMin; currentSlotStart += stepInterval) {
       const currentSlotEnd = currentSlotStart + serviceDuration;
       const timeString = formatMinutesToTime(currentSlotStart);
 
-      // Check if slot starts in the past (for today)
       let available = true;
-      if (isToday && currentSlotStart < currentMinToday) {
+
+      // 1. Service takes time beyond the barber's scheduled shift end
+      if (currentSlotEnd > endMin) {
         available = false;
       }
 
-      // Check break overlap: max(start1, start2) < min(end1, end2)
-      if (available && breakStartMin !== null && breakEndMin !== null) {
-        const hasBreakOverlap =
-          Math.max(currentSlotStart, breakStartMin) < Math.min(currentSlotEnd, breakEndMin);
-        if (hasBreakOverlap) {
-          available = false;
-        }
+      // 2. Slot starts in the past (for today)
+      if (available && isToday && currentSlotStart < currentMinToday) {
+        available = false;
       }
 
-      // Check existing appointments overlap
+      // 3. Current selected service overlaps with an existing appointment (pending or confirmed)
       if (available && appointments.length > 0) {
         for (const appt of appointments) {
           const apptStartMin = parseTimeToMinutes(appt.start_time);
           const apptEndMin = parseTimeToMinutes(appt.end_time);
 
+          // Overlap condition: max(start1, start2) < min(end1, end2)
           const hasAppointmentOverlap =
             Math.max(currentSlotStart, apptStartMin) < Math.min(currentSlotEnd, apptEndMin);
 

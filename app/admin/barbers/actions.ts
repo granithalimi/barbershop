@@ -46,15 +46,30 @@ export async function saveWeeklySchedule(
       };
     }
 
-    const payload = validated.data.map((day) => ({
-      barber_id: barberId,
-      day_of_week: day.day_of_week,
-      start_time: day.start_time.length === 5 ? `${day.start_time}:00` : day.start_time,
-      end_time: day.end_time.length === 5 ? `${day.end_time}:00` : day.end_time,
-      break_start: day.break_start ? (day.break_start.length === 5 ? `${day.break_start}:00` : day.break_start) : null,
-      break_end: day.break_end ? (day.break_end.length === 5 ? `${day.break_end}:00` : day.break_end) : null,
-      is_working: day.is_working,
-    }));
+    const DEFAULT_OFF_START = "09:00:00";
+    const DEFAULT_OFF_END = "18:00:00";
+
+    const payload = validated.data.map((day) => {
+      let startTime = day.start_time
+        ? (day.start_time.length === 5 ? `${day.start_time}:00` : day.start_time)
+        : DEFAULT_OFF_START;
+      let endTime = day.end_time
+        ? (day.end_time.length === 5 ? `${day.end_time}:00` : day.end_time)
+        : DEFAULT_OFF_END;
+
+      if (!day.is_working) {
+        if (!day.start_time) startTime = DEFAULT_OFF_START;
+        if (!day.end_time) endTime = DEFAULT_OFF_END;
+      }
+
+      return {
+        barber_id: barberId,
+        day_of_week: day.day_of_week,
+        start_time: startTime,
+        end_time: endTime,
+        is_working: day.is_working,
+      };
+    });
 
     const { error } = await supabase
       .from("barber_schedules")

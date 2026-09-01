@@ -79,9 +79,6 @@ export default function StepBarberSelect({
           });
 
           setBarbers(mappedBarbers);
-        } else {
-          // Fallback to mock barbers if database has no barbers registered yet
-          setBarbers(MOCK_BARBERS);
         }
       } catch (err) {
         console.error("Error fetching barbers from Supabase:", err);

@@ -31,6 +31,7 @@ export async function getCurrentUser(): Promise<{
     .eq("id", user.id)
     .single();
 
+
   return {
     user,
     profile: profile as CurrentUserProfile | null,

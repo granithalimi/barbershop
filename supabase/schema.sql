@@ -70,8 +70,6 @@ CREATE TABLE IF NOT EXISTS public.barber_schedules (
     day_of_week INTEGER NOT NULL CHECK (day_of_week BETWEEN 0 AND 6), -- 0=Sunday, 1=Monday... 6=Saturday
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
-    break_start TIME,
-    break_end TIME,
     is_working BOOLEAN NOT NULL DEFAULT true,
     UNIQUE (barber_id, day_of_week)
 );

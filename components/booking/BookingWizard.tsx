@@ -33,7 +33,7 @@ export default function BookingWizard({ currentUser = null }: BookingWizardProps
   const [selectedDate, setSelectedDate] = useState<string>(
     new Date().toISOString().split("T")[0]
   );
-  const [selectedTime, setSelectedTime] = useState<string>("10:30");
+  const [selectedTime, setSelectedTime] = useState<string>("");
 
   const [guestData, setGuestData] = useState<GuestData>({
     fullName: currentUser?.profile?.full_name || "",
@@ -57,6 +57,11 @@ export default function BookingWizard({ currentUser = null }: BookingWizardProps
   const handleSelectService = (service: MockService) => {
     setSelectedService(service);
     setCurrentStep(3);
+  };
+
+  const handleSelectDate = (date: string) => {
+    setSelectedDate(date);
+    setSelectedTime("");
   };
 
   const handleNextStep = () => {
@@ -244,7 +249,7 @@ export default function BookingWizard({ currentUser = null }: BookingWizardProps
             service={selectedService}
             selectedDate={selectedDate}
             selectedTime={selectedTime}
-            onSelectDate={setSelectedDate}
+            onSelectDate={handleSelectDate}
             onSelectTime={setSelectedTime}
           />
         )}

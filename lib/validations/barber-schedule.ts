@@ -1,23 +1,28 @@
 import { z } from "zod";
 
-export const dayScheduleSchema = z.object({
-  day_of_week: z.number().int().min(0).max(6),
-  is_working: z.boolean(),
-  start_time: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/, "Invalid start time"),
-  end_time: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/, "Invalid end time"),
-  break_start: z
-    .string()
-    .regex(/^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/, "Invalid break start time")
-    .optional()
-    .nullable()
-    .or(z.literal("")),
-  break_end: z
-    .string()
-    .regex(/^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/, "Invalid break end time")
-    .optional()
-    .nullable()
-    .or(z.literal("")),
-});
+export const dayScheduleSchema = z
+  .object({
+    day_of_week: z.number().int().min(0).max(6),
+    is_working: z.boolean(),
+    start_time: z.string().optional().or(z.literal("")),
+    end_time: z.string().optional().or(z.literal("")),
+  })
+  .refine(
+    (data) => {
+      if (data.is_working) {
+        const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/;
+        return (
+          Boolean(data.start_time && timeRegex.test(data.start_time)) &&
+          Boolean(data.end_time && timeRegex.test(data.end_time))
+        );
+      }
+      return true;
+    },
+    {
+      message: "Start time and end time are required when working",
+      path: ["start_time"],
+    }
+  );
 
 export const weeklyScheduleSchema = z.array(dayScheduleSchema);
 
@@ -50,8 +55,6 @@ export interface BarberScheduleRecord {
   day_of_week: number;
   start_time: string;
   end_time: string;
-  break_start: string | null;
-  break_end: string | null;
   is_working: boolean;
 }
 

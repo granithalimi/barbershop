@@ -25,7 +25,7 @@ export default function StepServiceSelect({
         setLoading(true);
         const supabase = createClient();
 
-        // 1. First, try to fetch services mapped in the barber_services junction table
+        // 1. Fetch services mapped in the barber_services junction table
         const { data: junctionData, error: junctionError } = await supabase
           .from("barber_services")
           .select("service_id")
@@ -39,17 +39,17 @@ export default function StepServiceSelect({
           serviceIds = barber.serviceIds;
         }
 
-        let query = supabase
-          .from("services")
-          .select("id, name, description, duration_minutes, price, is_active")
-          .eq("is_active", true);
-
-        // If specific service IDs were resolved for this barber, filter by them
-        if (serviceIds.length > 0) {
-          query = query.in("id", serviceIds);
+        // If this barber has no services assigned, set empty list
+        if (serviceIds.length === 0) {
+          setServices([]);
+          return;
         }
 
-        const { data: servicesData, error: servicesError } = await query;
+        // Query only the specific services mapped to this barber
+        const { data: servicesData, error: servicesError } = await supabase
+          .from("services")
+          .select("id, name, description, duration_minutes, price")
+          .in("id", serviceIds);
 
         if (servicesError) {
           throw servicesError;
@@ -67,19 +67,19 @@ export default function StepServiceSelect({
 
           setServices(mappedServices);
         } else {
-          // If no services found in database for this barber, fallback to mock filtered services
-          const fallback = MOCK_SERVICES.filter(
-            (srv) => !barber.serviceIds?.length || barber.serviceIds.includes(srv.id)
-          );
-          setServices(fallback.length > 0 ? fallback : MOCK_SERVICES);
+          setServices([]);
         }
       } catch (err) {
         console.error("Error fetching services from Supabase:", err);
-        // Fallback to mock data on error
-        const fallback = MOCK_SERVICES.filter(
-          (srv) => !barber.serviceIds?.length || barber.serviceIds.includes(srv.id)
-        );
-        setServices(fallback.length > 0 ? fallback : MOCK_SERVICES);
+        // Fallback to mock data matching barber's serviceIds only
+        if (barber.serviceIds && barber.serviceIds.length > 0) {
+          const fallback = MOCK_SERVICES.filter((srv) =>
+            barber.serviceIds?.includes(srv.id)
+          );
+          setServices(fallback);
+        } else {
+          setServices([]);
+        }
       } finally {
         setLoading(false);
       }

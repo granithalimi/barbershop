@@ -7,8 +7,6 @@ import {
   Loader2,
   Copy,
   AlertCircle,
-  Sparkles,
-  Coffee,
 } from "lucide-react";
 import {
   type DayScheduleInput,
@@ -31,11 +29,6 @@ const DAYS = [
   { index: 6, label: "Saturday", short: "Sat" },
   { index: 0, label: "Sunday", short: "Sun" },
 ];
-
-const DEFAULT_START = "09:00";
-const DEFAULT_END = "18:00";
-const DEFAULT_BREAK_START = "13:00";
-const DEFAULT_BREAK_END = "14:00";
 
 export function WeeklySchedule({
   barberId,
@@ -60,19 +53,15 @@ export function WeeklySchedule({
         return {
           day_of_week: d.index,
           is_working: existing.is_working,
-          start_time: existing.start_time.slice(0, 5),
-          end_time: existing.end_time.slice(0, 5),
-          break_start: existing.break_start ? existing.break_start.slice(0, 5) : "",
-          break_end: existing.break_end ? existing.break_end.slice(0, 5) : "",
+          start_time: existing.start_time ? existing.start_time.slice(0, 5) : "",
+          end_time: existing.end_time ? existing.end_time.slice(0, 5) : "",
         };
       }
       return {
         day_of_week: d.index,
-        is_working: d.index !== 0, // Sunday off by default if no record
-        start_time: DEFAULT_START,
-        end_time: DEFAULT_END,
-        break_start: DEFAULT_BREAK_START,
-        break_end: DEFAULT_BREAK_END,
+        is_working: false,
+        start_time: "",
+        end_time: "",
       };
     });
 
@@ -105,8 +94,6 @@ export function WeeklySchedule({
             is_working: monday.is_working,
             start_time: monday.start_time,
             end_time: monday.end_time,
-            break_start: monday.break_start,
-            break_end: monday.break_end,
           };
         }
         return day;
@@ -117,28 +104,26 @@ export function WeeklySchedule({
   const handleSave = () => {
     setFeedback(null);
 
-    // Basic client validation: start must be earlier than end when working
+    // Basic client validation: start and end times must be valid when working
     for (const day of schedules) {
       if (day.is_working) {
+        const dayName =
+          DAYS.find((d) => d.index === day.day_of_week)?.label || "Day";
+
+        if (!day.start_time || !day.end_time) {
+          setFeedback({
+            type: "error",
+            message: `${dayName}: Start time and end time are required when marked as working.`,
+          });
+          return;
+        }
+
         if (day.start_time >= day.end_time) {
-          const dayName =
-            DAYS.find((d) => d.index === day.day_of_week)?.label || "Day";
           setFeedback({
             type: "error",
             message: `${dayName}: Start time must be earlier than end time.`,
           });
           return;
-        }
-        if (day.break_start && day.break_end) {
-          if (day.break_start >= day.break_end) {
-            const dayName =
-              DAYS.find((d) => d.index === day.day_of_week)?.label || "Day";
-            setFeedback({
-              type: "error",
-              message: `${dayName}: Break start must be earlier than break end.`,
-            });
-            return;
-          }
         }
       }
     }
@@ -209,10 +194,8 @@ export function WeeklySchedule({
           const dayData = schedules.find((s) => s.day_of_week === d.index) || {
             day_of_week: d.index,
             is_working: false,
-            start_time: DEFAULT_START,
-            end_time: DEFAULT_END,
-            break_start: "",
-            break_end: "",
+            start_time: "",
+            end_time: "",
           };
 
           return (
@@ -258,7 +241,7 @@ export function WeeklySchedule({
                 </div>
               </div>
 
-              {/* Working Hours & Break Hours Inputs */}
+              {/* Working Hours Inputs */}
               {dayData.is_working ? (
                 <div className="flex flex-wrap items-center gap-4 sm:gap-6">
                   {/* Shift Hours */}
@@ -270,7 +253,7 @@ export function WeeklySchedule({
                     <div className="flex items-center gap-1.5">
                       <input
                         type="time"
-                        value={dayData.start_time}
+                        value={dayData.start_time || ""}
                         onChange={(e) =>
                           updateDay(d.index, "start_time", e.target.value)
                         }
@@ -279,39 +262,10 @@ export function WeeklySchedule({
                       <span className="text-zinc-500 text-xs">-</span>
                       <input
                         type="time"
-                        value={dayData.end_time}
+                        value={dayData.end_time || ""}
                         onChange={(e) =>
                           updateDay(d.index, "end_time", e.target.value)
                         }
-                        className="rounded-xl bg-zinc-950 border border-zinc-800 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Break Hours */}
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1.5 text-zinc-400 text-xs font-light">
-                      <Coffee className="h-3.5 w-3.5 text-sky-400/80" />
-                      <span>Break:</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <input
-                        type="time"
-                        value={dayData.break_start || ""}
-                        onChange={(e) =>
-                          updateDay(d.index, "break_start", e.target.value)
-                        }
-                        placeholder="--:--"
-                        className="rounded-xl bg-zinc-950 border border-zinc-800 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500"
-                      />
-                      <span className="text-zinc-500 text-xs">-</span>
-                      <input
-                        type="time"
-                        value={dayData.break_end || ""}
-                        onChange={(e) =>
-                          updateDay(d.index, "break_end", e.target.value)
-                        }
-                        placeholder="--:--"
                         className="rounded-xl bg-zinc-950 border border-zinc-800 px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500"
                       />
                     </div>

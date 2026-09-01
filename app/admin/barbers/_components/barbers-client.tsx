@@ -17,6 +17,7 @@ import {
   type BarberTimeOffRecord,
 } from "@/lib/validations/barber-schedule";
 import { WeeklySchedule } from "./weekly-schedule";
+import { BarberServicesSection } from "./barber-services-section";
 import { TimeOffSection } from "./time-off-section";
 
 interface BarbersClientProps {
@@ -33,7 +34,7 @@ export function BarbersClient({
   const [selectedBarberId, setSelectedBarberId] = useState<string>(
     barbers[0]?.id || ""
   );
-  const [activeTab, setActiveTab] = useState<"schedule" | "time-off">("schedule");
+  const [activeTab, setActiveTab] = useState<"schedule" | "time-off" | "services">("schedule");
 
   const currentBarber =
     barbers.find((b) => b.id === selectedBarberId) || barbers[0];
@@ -151,6 +152,17 @@ export function BarbersClient({
               Weekly Schedule
             </button>
             <button
+              onClick={() => setActiveTab("services")}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer ${
+                activeTab === "services"
+                  ? "bg-amber-500 text-zinc-950 font-semibold shadow-sm"
+                  : "text-zinc-400 hover:text-white"
+              }`}
+            >
+              <Clock className="h-3.5 w-3.5" />
+              Services
+            </button>
+            <button
               onClick={() => setActiveTab("time-off")}
               className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition cursor-pointer ${
                 activeTab === "time-off"
@@ -173,6 +185,13 @@ export function BarbersClient({
               barberId={currentBarber.id}
               barberName={currentBarber.full_name}
               initialSchedules={currentSchedules}
+            />
+          )}
+
+          {activeTab === "services" && (
+            <BarberServicesSection
+              barberId={currentBarber.id}
+              barberName={currentBarber.full_name}
             />
           )}
 

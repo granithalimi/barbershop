@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/supabase/auth";
-import UserMenuDropdown from "@/app/_components/UserMenuDropdown";
+import UserMenuDropdown from "@/components/landing/UserMenuDropdown";
 
 export const dynamic = "force-dynamic";
 

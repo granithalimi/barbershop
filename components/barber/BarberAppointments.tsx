@@ -14,9 +14,8 @@ import {
   ExternalLink,
   Check,
   X,
-  PhoneCall,
 } from "lucide-react";
-import { updateAppointmentStatus, type AppointmentStatus } from "../actions";
+import { updateAppointmentStatus, type AppointmentStatus } from "@/features/barber/actions";
 
 export interface BarberAppointmentItem {
   id: string;

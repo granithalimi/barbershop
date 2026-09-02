@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { X, Loader2, Calendar as CalendarIcon, Sparkles } from "lucide-react";
+import { X, Loader2, Calendar as CalendarIcon } from "lucide-react";
 import { type TimeOffInput, timeOffSchema } from "@/lib/validations/barber-schedule";
-import { addTimeOff } from "../actions";
+import { addTimeOff } from "@/features/admin/barbers/actions";
 
 interface TimeOffModalProps {
   isOpen: boolean;

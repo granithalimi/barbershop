@@ -5,13 +5,11 @@ import {
   Plus,
   Calendar,
   Trash2,
-  Sparkles,
   Palmtree,
-  Clock,
 } from "lucide-react";
 import { type BarberTimeOffRecord } from "@/lib/validations/barber-schedule";
-import { TimeOffModal } from "./time-off-modal";
-import { DeleteTimeOffModal } from "./delete-time-off-modal";
+import { TimeOffModal } from "./TimeOffModal";
+import { DeleteTimeOffModal } from "./DeleteTimeOffModal";
 
 interface TimeOffSectionProps {
   barberId: string;

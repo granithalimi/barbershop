@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Scissors, Calendar } from "lucide-react";
 import { getCurrentUser } from "@/lib/supabase/auth";
-import UserMenuDropdown from "./UserMenuDropdown";
+import UserMenuDropdown from "@/components/landing/UserMenuDropdown";
 
 export default async function Navbar() {
   const authData = await getCurrentUser();

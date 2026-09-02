@@ -3,7 +3,7 @@
 import { useTransition, useState } from "react";
 import { AlertTriangle, Loader2, X } from "lucide-react";
 import { type BarberTimeOffRecord } from "@/lib/validations/barber-schedule";
-import { deleteTimeOff } from "../actions";
+import { deleteTimeOff } from "@/features/admin/barbers/actions";
 
 interface DeleteTimeOffModalProps {
   isOpen: boolean;

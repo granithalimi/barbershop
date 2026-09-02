@@ -5,20 +5,15 @@ import {
   Scissors,
   Clock,
   Palmtree,
-  Sparkles,
-  Calendar,
-  Phone,
-  Mail,
-  User,
 } from "lucide-react";
 import {
   type BarberProfile,
   type BarberScheduleRecord,
   type BarberTimeOffRecord,
 } from "@/lib/validations/barber-schedule";
-import { WeeklySchedule } from "./weekly-schedule";
-import { BarberServicesSection } from "./barber-services-section";
-import { TimeOffSection } from "./time-off-section";
+import { WeeklySchedule } from "./WeeklySchedule";
+import { BarberServicesSection } from "./BarberServicesSection";
+import { TimeOffSection } from "./TimeOffSection";
 
 interface BarbersClientProps {
   barbers: BarberProfile[];

@@ -3,11 +3,8 @@ import { redirect } from "next/navigation";
 import { Scissors } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/supabase/auth";
-import UserMenuDropdown from "@/app/_components/UserMenuDropdown";
-import {
-  BarberAppointmentsClient,
-  type BarberAppointmentItem,
-} from "./_components/barber-appointments-client";
+import UserMenuDropdown from "@/components/landing/UserMenuDropdown";
+import { BarberAppointmentsClient, type BarberAppointmentItem } from "@/components/barber/BarberAppointments";
 
 export const dynamic = "force-dynamic";
 
@@ -82,9 +79,7 @@ export default async function BarberAppointmentsPage() {
 
       {/* Main Content */}
       <main className="relative z-10 flex-1 px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto w-full">
-        <BarberAppointmentsClient
-          initialAppointments={initialAppointments}
-        />
+        <BarberAppointmentsClient initialAppointments={initialAppointments} />
       </main>
 
       {/* Footer */}

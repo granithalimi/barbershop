@@ -12,7 +12,7 @@ import {
   type DayScheduleInput,
   type BarberScheduleRecord,
 } from "@/lib/validations/barber-schedule";
-import { saveWeeklySchedule } from "../actions";
+import { saveWeeklySchedule } from "@/features/admin/barbers/actions";
 
 interface WeeklyScheduleProps {
   barberId: string;

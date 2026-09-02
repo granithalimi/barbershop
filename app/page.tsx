@@ -1,12 +1,12 @@
-import Navbar from "./_components/Navbar";
-import HeroSection from "./_components/HeroSection";
-import ValuePillars from "./_components/ValuePillars";
-import ServicesSection from "./_components/ServicesSection";
-import GallerySection from "./_components/GallerySection";
-import BarbersSection from "./_components/BarbersSection";
-import ShopInfoSection from "./_components/ShopInfoSection";
-import CtaBanner from "./_components/CtaBanner";
-import Footer from "./_components/Footer";
+import Navbar from "../components/landing/Navbar";
+import HeroSection from "../components/landing/HeroSection";
+import ValuePillars from "../components/landing/ValuePillars";
+import ServicesSection from "../components/landing/ServicesSection";
+import GallerySection from "../components/landing/GallerySection";
+import BarbersSection from "../components/landing/BarbersSection";
+import ShopInfoSection from "../components/landing/ShopInfoSection";
+import CtaBanner from "../components/landing/CtaBanner";
+import Footer from "../components/landing/Footer";
 
 export default function Home() {
   return (

@@ -2,8 +2,8 @@ import Link from "next/link";
 import { Scissors } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/supabase/auth";
-import UserMenuDropdown from "@/app/_components/UserMenuDropdown";
-import { BarbersClient } from "./_components/barbers-client";
+import UserMenuDropdown from "@/components/landing/UserMenuDropdown";
+import { BarbersClient } from "@/components/admin/barbers/BarbersClient";
 import {
   type BarberProfile,
   type BarberScheduleRecord,

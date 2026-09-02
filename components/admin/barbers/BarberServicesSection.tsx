@@ -7,7 +7,6 @@ import {
   Loader2,
   AlertCircle,
   Clock,
-  Euro,
   Sparkles,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";

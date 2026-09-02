@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { CheckCircle2, Calendar, Clock, Scissors, MessageCircle, Home, RotateCcw } from "lucide-react";
-import type { MockBarber, MockService } from "@/lib/mock-booking-data";
+import type { Barber, Service } from "@/lib/booking-data";
 
 interface StepBookingSuccessProps {
-  barber: MockBarber;
-  service: MockService;
+  barber: Barber;
+  service: Service;
   selectedDate: string;
   selectedTime: string;
   onReset: () => void;

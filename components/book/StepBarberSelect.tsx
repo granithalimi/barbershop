@@ -2,19 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { Star, Check, Sparkles, Loader2 } from "lucide-react";
-import { MOCK_BARBERS, type MockBarber } from "@/lib/mock-booking-data";
+import { type Barber } from "@/lib/booking-data";
 import { createClient } from "@/lib/supabase/client";
 
 interface StepBarberSelectProps {
-  selectedBarber: MockBarber | null;
-  onSelectBarber: (barber: MockBarber) => void;
+  selectedBarber: Barber | null;
+  onSelectBarber: (barber: Barber) => void;
 }
 
 export default function StepBarberSelect({
   selectedBarber,
   onSelectBarber,
 }: StepBarberSelectProps) {
-  const [barbers, setBarbers] = useState<MockBarber[]>([]);
+  const [barbers, setBarbers] = useState<Barber[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -45,7 +45,7 @@ export default function StepBarberSelect({
             .from("reviews")
             .select("barber_id, rating");
 
-          const mappedBarbers: MockBarber[] = profilesData.map((p) => {
+          const mappedBarbers: Barber[] = profilesData.map((p) => {
             const barberReviews = reviewsData?.filter((r) => r.barber_id === p.id) || [];
             const avgRating = barberReviews.length > 0
               ? barberReviews.reduce((acc, curr) => acc + (curr.rating || 5), 0) / barberReviews.length
@@ -57,12 +57,12 @@ export default function StepBarberSelect({
 
             const initials = p.full_name
               ? p.full_name
-                  .split(" ")
-                  .filter(Boolean)
-                  .map((n: string) => n[0])
-                  .slice(0, 2)
-                  .join("")
-                  .toUpperCase()
+                .split(" ")
+                .filter(Boolean)
+                .map((n: string) => n[0])
+                .slice(0, 2)
+                .join("")
+                .toUpperCase()
               : "B";
 
             return {
@@ -82,8 +82,6 @@ export default function StepBarberSelect({
         }
       } catch (err) {
         console.error("Error fetching barbers from Supabase:", err);
-        // Graceful fallback to mock barbers on connection/query error
-        setBarbers(MOCK_BARBERS);
       } finally {
         setLoading(false);
       }
@@ -119,19 +117,17 @@ export default function StepBarberSelect({
                 key={barber.id}
                 type="button"
                 onClick={() => onSelectBarber(barber)}
-                className={`w-full text-left relative p-4 sm:p-5 rounded-2xl border transition-all duration-200 flex items-start gap-4 active:scale-[0.99] cursor-pointer  ${
-                  isSelected
-                    ? "bg-amber-500/10 border-amber-500 ring-1 ring-amber-500/50 shadow-lg shadow-amber-500/10"
-                    : "bg-zinc-900/80 hover:bg-zinc-900 border-zinc-800/80 hover:border-zinc-700 shadow-md"
-                }`}
+                className={`w-full text-left relative p-4 sm:p-5 rounded-2xl border transition-all duration-200 flex items-start gap-4 active:scale-[0.99] cursor-pointer  ${isSelected
+                  ? "bg-amber-500/10 border-amber-500 ring-1 ring-amber-500/50 shadow-lg shadow-amber-500/10"
+                  : "bg-zinc-900/80 hover:bg-zinc-900 border-zinc-800/80 hover:border-zinc-700 shadow-md"
+                  }`}
               >
                 {/* Avatar / Initials */}
                 <div
-                  className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center font-black text-lg sm:text-xl shrink-0 transition-transform ${
-                    isSelected
-                      ? "bg-gradient-to-br from-amber-400 to-amber-600 text-zinc-950 shadow-md shadow-amber-500/20 scale-105"
-                      : "bg-zinc-800 text-zinc-300 border border-zinc-700"
-                  }`}
+                  className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center font-black text-lg sm:text-xl shrink-0 transition-transform ${isSelected
+                    ? "bg-gradient-to-br from-amber-400 to-amber-600 text-zinc-950 shadow-md shadow-amber-500/20 scale-105"
+                    : "bg-zinc-800 text-zinc-300 border border-zinc-700"
+                    }`}
                 >
                   {barber.avatarUrl ? (
                     <img
@@ -167,11 +163,10 @@ export default function StepBarberSelect({
 
                 {/* Selection Checkmark */}
                 <div
-                  className={`absolute top-4 right-4 w-6 h-6 rounded-full flex items-center justify-center transition-all ${
-                    isSelected
-                      ? "bg-amber-500 text-zinc-950 shadow-sm"
-                      : "border border-zinc-700 bg-zinc-950/40 text-transparent"
-                  }`}
+                  className={`absolute top-4 right-4 w-6 h-6 rounded-full flex items-center justify-center transition-all ${isSelected
+                    ? "bg-amber-500 text-zinc-950 shadow-sm"
+                    : "border border-zinc-700 bg-zinc-950/40 text-transparent"
+                    }`}
                 >
                   <Check className="w-3.5 h-3.5 stroke-[3]" />
                 </div>

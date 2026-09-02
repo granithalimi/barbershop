@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { Clock, Check, Sparkles, Loader2, AlertCircle } from "lucide-react";
-import { MOCK_SERVICES, type MockBarber, type MockService } from "@/lib/mock-booking-data";
+import { type Barber, type Service } from "@/lib/booking-data";
 import { createClient } from "@/lib/supabase/client";
 
 interface StepServiceSelectProps {
-  barber: MockBarber;
-  selectedService: MockService | null;
-  onSelectService: (service: MockService) => void;
+  barber: Barber;
+  selectedService: Service | null;
+  onSelectService: (service: Service) => void;
 }
 
 export default function StepServiceSelect({
@@ -16,7 +16,7 @@ export default function StepServiceSelect({
   selectedService,
   onSelectService,
 }: StepServiceSelectProps) {
-  const [services, setServices] = useState<MockService[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -25,22 +25,8 @@ export default function StepServiceSelect({
         setLoading(true);
         const supabase = createClient();
 
-        // 1. Fetch services mapped in the barber_services junction table
-        const { data: junctionData, error: junctionError } = await supabase
-          .from("barber_services")
-          .select("service_id")
-          .eq("barber_id", barber.id);
-
-        let serviceIds: string[] = [];
-        if (!junctionError && junctionData && junctionData.length > 0) {
-          serviceIds = junctionData.map((item) => item.service_id);
-        } else if (barber.serviceIds && barber.serviceIds.length > 0) {
-          // If junction query returns nothing, use barber.serviceIds if available
-          serviceIds = barber.serviceIds;
-        }
-
         // If this barber has no services assigned, set empty list
-        if (serviceIds.length === 0) {
+        if (barber.serviceIds.length === 0) {
           setServices([]);
           return;
         }
@@ -49,14 +35,14 @@ export default function StepServiceSelect({
         const { data: servicesData, error: servicesError } = await supabase
           .from("services")
           .select("id, name, description, duration_minutes, price")
-          .in("id", serviceIds);
+          .in("id", barber.serviceIds);
 
         if (servicesError) {
           throw servicesError;
         }
 
         if (servicesData && servicesData.length > 0) {
-          const mappedServices: MockService[] = servicesData.map((s, index) => ({
+          const mappedServices: Service[] = servicesData.map((s, index) => ({
             id: s.id,
             name: s.name,
             description: s.description || "",
@@ -71,15 +57,7 @@ export default function StepServiceSelect({
         }
       } catch (err) {
         console.error("Error fetching services from Supabase:", err);
-        // Fallback to mock data matching barber's serviceIds only
-        if (barber.serviceIds && barber.serviceIds.length > 0) {
-          const fallback = MOCK_SERVICES.filter((srv) =>
-            barber.serviceIds?.includes(srv.id)
-          );
-          setServices(fallback);
-        } else {
-          setServices([]);
-        }
+        setServices([]);
       } finally {
         setLoading(false);
       }
@@ -122,11 +100,10 @@ export default function StepServiceSelect({
                 key={service.id}
                 type="button"
                 onClick={() => onSelectService(service)}
-                className={`w-full text-left relative p-4 sm:p-5 rounded-2xl border transition-all duration-200 active:scale-[0.99] cursor-pointer ${
-                  isSelected
-                    ? "bg-amber-500/10 border-amber-500 ring-1 ring-amber-500/50 shadow-lg shadow-amber-500/10"
-                    : "bg-zinc-900/80 hover:bg-zinc-900 border-zinc-800/80 hover:border-zinc-700 shadow-md"
-                }`}
+                className={`w-full text-left relative p-4 sm:p-5 rounded-2xl border transition-all duration-200 active:scale-[0.99] cursor-pointer ${isSelected
+                  ? "bg-amber-500/10 border-amber-500 ring-1 ring-amber-500/50 shadow-lg shadow-amber-500/10"
+                  : "bg-zinc-900/80 hover:bg-zinc-900 border-zinc-800/80 hover:border-zinc-700 shadow-md"
+                  }`}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0 pr-6">
@@ -156,11 +133,10 @@ export default function StepServiceSelect({
                   {/* Price & Selection Check */}
                   <div className="text-right flex flex-col items-end justify-between self-stretch shrink-0">
                     <div
-                      className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
-                        isSelected
-                          ? "bg-amber-500 text-zinc-950 shadow-sm"
-                          : "border border-zinc-700 bg-zinc-950/40 text-transparent"
-                      }`}
+                      className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${isSelected
+                        ? "bg-amber-500 text-zinc-950 shadow-sm"
+                        : "border border-zinc-700 bg-zinc-950/40 text-transparent"
+                        }`}
                     >
                       <Check className="w-3.5 h-3.5 stroke-[3]" />
                     </div>

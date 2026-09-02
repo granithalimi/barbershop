@@ -8,13 +8,13 @@ import {
   Banknote,
   AlertCircle,
 } from "lucide-react";
-import type { MockBarber, MockService } from "@/lib/mock-booking-data";
+import type { Barber, Service } from "@/lib/booking-data";
 import type { CurrentUserProfile } from "@/lib/supabase/auth";
 import type { GuestData } from "./StepContactDetails";
 
 interface StepConfirmationProps {
-  barber: MockBarber;
-  service: MockService;
+  barber: Barber;
+  service: Service;
   selectedDate: string;
   selectedTime: string;
   currentUser?: {

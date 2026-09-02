@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Scissors, Calendar, Clock, User, ShieldCheck, Check, Loader2 } from "lucide-react";
-import { MOCK_BARBERS, MOCK_SERVICES, type MockBarber, type MockService } from "@/lib/mock-booking-data";
+import { ArrowLeft, ArrowRight, Check, Loader2 } from "lucide-react";
+import { type Barber, type Service } from "@/lib/booking-data"
 import type { CurrentUserProfile } from "@/lib/supabase/auth";
 import StepBarberSelect from "./StepBarberSelect";
 import StepServiceSelect from "./StepServiceSelect";
@@ -28,8 +28,8 @@ export default function BookingWizard({ currentUser = null }: BookingWizardProps
   const isLoggedIn = !!currentUser?.user;
 
   // Form State
-  const [selectedBarber, setSelectedBarber] = useState<MockBarber | null>(null);
-  const [selectedService, setSelectedService] = useState<MockService | null>(null);
+  const [selectedBarber, setSelectedBarber] = useState<Barber | null>(null);
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>(
     new Date().toISOString().split("T")[0]
   );
@@ -45,7 +45,7 @@ export default function BookingWizard({ currentUser = null }: BookingWizardProps
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Step Handlers
-  const handleSelectBarber = (barber: MockBarber) => {
+  const handleSelectBarber = (barber: Barber) => {
     setSelectedBarber(barber);
     // Reset service if current service is not performed by this barber
     if (selectedService && !barber.serviceIds.includes(selectedService.id)) {
@@ -54,7 +54,7 @@ export default function BookingWizard({ currentUser = null }: BookingWizardProps
     setCurrentStep(2);
   };
 
-  const handleSelectService = (service: MockService) => {
+  const handleSelectService = (service: Service) => {
     setSelectedService(service);
     setCurrentStep(3);
   };

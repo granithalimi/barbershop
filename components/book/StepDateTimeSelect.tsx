@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useMemo, useRef } from "react";
 import { Calendar as CalendarIcon, Clock, Sun, Sunset, Moon, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
-import { type MockBarber, type MockService, type TimeSlot } from "@/lib/mock-booking-data";
+import { type Barber, type Service, type TimeSlot } from "@/lib/booking-data";
 import { createClient } from "@/lib/supabase/client";
 
 interface StepDateTimeSelectProps {
-  barber?: MockBarber | null;
-  service?: MockService | null;
+  barber?: Barber | null;
+  service?: Service | null;
   selectedDate: string; // "YYYY-MM-DD"
   selectedTime: string; // "HH:MM"
   onSelectDate: (date: string) => void;
@@ -388,32 +388,28 @@ export default function StepDateTimeSelect({
                   type="button"
                   disabled={!isAvailable}
                   onClick={() => onSelectDate(day.isoString)}
-                  className={`flex flex-col items-center justify-center min-w-[62px] sm:min-w-[70px] py-3 px-2 rounded-2xl border transition-all shrink-0 cursor-pointer ${
-                    isSelected
-                      ? "bg-amber-500 text-zinc-950 border-amber-400 shadow-lg shadow-amber-500/20 font-bold scale-[1.03]"
-                      : isAvailable
+                  className={`flex flex-col items-center justify-center min-w-[62px] sm:min-w-[70px] py-3 px-2 rounded-2xl border transition-all shrink-0 cursor-pointer ${isSelected
+                    ? "bg-amber-500 text-zinc-950 border-amber-400 shadow-lg shadow-amber-500/20 font-bold scale-[1.03]"
+                    : isAvailable
                       ? "bg-zinc-900/90 text-zinc-400 border-zinc-800 hover:border-zinc-700 hover:text-white active:scale-95"
                       : "bg-zinc-950/40 text-zinc-600 border-zinc-900 opacity-40 cursor-not-allowed"
-                  }`}
+                    }`}
                 >
                   <span
-                    className={`text-[10px] uppercase font-bold tracking-wider ${
-                      isSelected ? "text-zinc-950" : isAvailable ? "text-zinc-500" : "text-zinc-700"
-                    }`}
+                    className={`text-[10px] uppercase font-bold tracking-wider ${isSelected ? "text-zinc-950" : isAvailable ? "text-zinc-500" : "text-zinc-700"
+                      }`}
                   >
                     {day.isToday ? "Today" : day.dayName}
                   </span>
                   <span
-                    className={`text-base sm:text-lg font-black mt-0.5 ${
-                      isSelected ? "text-zinc-950" : isAvailable ? "text-zinc-100" : "text-zinc-600"
-                    }`}
+                    className={`text-base sm:text-lg font-black mt-0.5 ${isSelected ? "text-zinc-950" : isAvailable ? "text-zinc-100" : "text-zinc-600"
+                      }`}
                   >
                     {day.dayNum}
                   </span>
                   <span
-                    className={`text-[10px] ${
-                      isSelected ? "text-zinc-900 font-semibold" : isAvailable ? "text-zinc-500" : "text-zinc-700"
-                    }`}
+                    className={`text-[10px] ${isSelected ? "text-zinc-900 font-semibold" : isAvailable ? "text-zinc-500" : "text-zinc-700"
+                      }`}
                   >
                     {day.isOnTimeOff ? "Off" : day.monthName}
                   </span>
@@ -459,13 +455,12 @@ export default function StepDateTimeSelect({
                         type="button"
                         disabled={!slot.available}
                         onClick={() => onSelectTime(slot.time)}
-                        className={`py-2 px-1.5 rounded-xl text-xs font-bold border transition-all text-center cursor-pointer ${
-                          isSelected
-                            ? "bg-amber-500 text-zinc-950 border-amber-400 shadow-md shadow-amber-500/20 scale-[1.02]"
-                            : slot.available
+                        className={`py-2 px-1.5 rounded-xl text-xs font-bold border transition-all text-center cursor-pointer ${isSelected
+                          ? "bg-amber-500 text-zinc-950 border-amber-400 shadow-md shadow-amber-500/20 scale-[1.02]"
+                          : slot.available
                             ? "bg-zinc-900/80 text-zinc-200 border-zinc-800 hover:border-zinc-600 hover:bg-zinc-800"
                             : "bg-zinc-950/40 text-zinc-600 border-zinc-900 line-through opacity-40 cursor-not-allowed"
-                        }`}
+                          }`}
                       >
                         {slot.time}
                       </button>
@@ -491,13 +486,12 @@ export default function StepDateTimeSelect({
                         type="button"
                         disabled={!slot.available}
                         onClick={() => onSelectTime(slot.time)}
-                        className={`py-2 px-1.5 rounded-xl text-xs font-bold border transition-all text-center cursor-pointer ${
-                          isSelected
-                            ? "bg-amber-500 text-zinc-950 border-amber-400 shadow-md shadow-amber-500/20 scale-[1.02]"
-                            : slot.available
+                        className={`py-2 px-1.5 rounded-xl text-xs font-bold border transition-all text-center cursor-pointer ${isSelected
+                          ? "bg-amber-500 text-zinc-950 border-amber-400 shadow-md shadow-amber-500/20 scale-[1.02]"
+                          : slot.available
                             ? "bg-zinc-900/80 text-zinc-200 border-zinc-800 hover:border-zinc-600 hover:bg-zinc-800"
                             : "bg-zinc-950/40 text-zinc-600 border-zinc-900 line-through opacity-40 cursor-not-allowed"
-                        }`}
+                          }`}
                       >
                         {slot.time}
                       </button>
@@ -523,13 +517,12 @@ export default function StepDateTimeSelect({
                         type="button"
                         disabled={!slot.available}
                         onClick={() => onSelectTime(slot.time)}
-                        className={`py-2 px-1.5 rounded-xl text-xs font-bold border transition-all text-center cursor-pointer ${
-                          isSelected
-                            ? "bg-amber-500 text-zinc-950 border-amber-400 shadow-md shadow-amber-500/20 scale-[1.02]"
-                            : slot.available
+                        className={`py-2 px-1.5 rounded-xl text-xs font-bold border transition-all text-center cursor-pointer ${isSelected
+                          ? "bg-amber-500 text-zinc-950 border-amber-400 shadow-md shadow-amber-500/20 scale-[1.02]"
+                          : slot.available
                             ? "bg-zinc-900/80 text-zinc-200 border-zinc-800 hover:border-zinc-600 hover:bg-zinc-800"
                             : "bg-zinc-950/40 text-zinc-600 border-zinc-900 line-through opacity-40 cursor-not-allowed"
-                        }`}
+                          }`}
                       >
                         {slot.time}
                       </button>

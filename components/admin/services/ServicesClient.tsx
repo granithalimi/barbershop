@@ -11,8 +11,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import { type ServiceItem } from "@/lib/validations/service";
-import { ServiceModal } from "./service-modal";
-import { DeleteModal } from "./delete-modal";
+import { ServiceModal } from "./ServiceModal";
+import { DeleteModal } from "./DeleteModal";
 
 interface ServicesClientProps {
   initialServices: ServiceItem[];

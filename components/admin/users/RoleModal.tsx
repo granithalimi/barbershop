@@ -3,7 +3,7 @@
 import { useState, useTransition, useEffect } from "react";
 import { X, Loader2, Shield, Scissors, User } from "lucide-react";
 import { type ProfileItem, type UserRole } from "@/lib/validations/user";
-import { updateUserRole } from "../actions";
+import { updateUserRole } from "@/features/admin/users/actions";
 
 interface RoleModalProps {
   isOpen: boolean;

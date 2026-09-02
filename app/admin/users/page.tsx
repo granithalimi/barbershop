@@ -3,7 +3,7 @@ import { Scissors } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/supabase/auth";
 import UserMenuDropdown from "@/components/landing/UserMenuDropdown";
-import { UsersClient } from "./_components/users-client";
+import { UsersClient } from "@/components/admin/users/UsersClient";
 import { type ProfileItem } from "@/lib/validations/user";
 
 export const dynamic = "force-dynamic";

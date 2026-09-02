@@ -2,8 +2,8 @@ import Link from "next/link";
 import { Scissors } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/supabase/auth";
-import UserMenuDropdown from "@/app/_components/UserMenuDropdown";
-import { ServicesClient } from "./_components/services-client";
+import UserMenuDropdown from "@/components/landing/UserMenuDropdown";
+import { ServicesClient } from "@/components/admin/services/ServicesClient";
 import { type ServiceItem } from "@/lib/validations/service";
 
 export const dynamic = "force-dynamic";

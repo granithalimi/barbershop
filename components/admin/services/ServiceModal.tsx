@@ -3,7 +3,7 @@
 import { useState, useEffect, useTransition } from "react";
 import { X, Loader2, Sparkles } from "lucide-react";
 import { type ServiceItem, type ServiceInput, serviceSchema } from "@/lib/validations/service";
-import { createService, updateService } from "../actions";
+import { createService, updateService } from "@/features/admin/services/actions";
 
 interface ServiceModalProps {
   isOpen: boolean;

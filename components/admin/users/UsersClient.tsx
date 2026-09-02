@@ -13,7 +13,7 @@ import {
   Mail,
 } from "lucide-react";
 import { type ProfileItem, type UserRole } from "@/lib/validations/user";
-import { RoleModal } from "./role-modal";
+import { RoleModal } from "./RoleModal";
 
 interface UsersClientProps {
   initialUsers: ProfileItem[];

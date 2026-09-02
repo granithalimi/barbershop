@@ -3,7 +3,7 @@
 import { useTransition, useState } from "react";
 import { AlertTriangle, Loader2, X } from "lucide-react";
 import { type ServiceItem } from "@/lib/validations/service";
-import { deleteService } from "../actions";
+import { deleteService } from "@/features/admin/services/actions";
 
 interface DeleteModalProps {
   isOpen: boolean;

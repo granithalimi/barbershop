@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Scissors, Sparkles } from "lucide-react";
 import { getCurrentUser } from "@/lib/supabase/auth";
-import BookingWizard from "@/components/booking/BookingWizard";
+import BookingWizard from "./_components/BookingWizard";
 
 export const metadata = {
   title: "Book an Appointment | Apex Barbershop",

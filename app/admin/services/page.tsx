@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Scissors } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/supabase/auth";
-import UserMenuDropdown from "@/components/landing/UserMenuDropdown";
+import UserMenuDropdown from "@/app/_components/UserMenuDropdown";
 import { ServicesClient } from "./_components/services-client";
 import { type ServiceItem } from "@/lib/validations/service";
 

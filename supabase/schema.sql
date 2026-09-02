@@ -19,7 +19,7 @@ EXCEPTION
 END $$;
 
 DO $$ BEGIN
-    CREATE TYPE appointment_status AS ENUM ('pending', 'confirmed', 'declined', 'completed', 'cancelled');
+    CREATE TYPE appointment_status AS ENUM ('pending', 'confirmed', 'declined');
 EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;

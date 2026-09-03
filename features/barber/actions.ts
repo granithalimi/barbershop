@@ -13,8 +13,8 @@ export async function updateAppointmentStatus(
   try {
     const authData = await getCurrentUser();
 
-    if (!authData?.user || authData.profile?.role !== "barber") {
-      return { success: false, error: "Unauthorized. Barber access required." };
+    if (!authData?.user || authData.profile?.role === "client") {
+      return { success: false, error: "Unauthorized. Barber or Admin access required." };
     }
 
     const supabase = await createClient();
@@ -27,7 +27,6 @@ export async function updateAppointmentStatus(
         updated_at: new Date().toISOString(),
       })
       .eq("id", appointmentId)
-      .eq("barber_id", authData.user.id)
       .select(
         `
         id,
@@ -48,7 +47,11 @@ export async function updateAppointmentStatus(
       return { success: false, error: error.message };
     }
 
-    revalidatePath("/barber/appointments");
+    if(authData?.profile?.role == "barber"){
+      revalidatePath("/barber/appointments");
+    }else{
+      revalidatePath("/admin/appointments");
+    }
     return { success: true, appointment: data };
   } catch (err: unknown) {
     console.error("Unexpected error updating appointment:", err);

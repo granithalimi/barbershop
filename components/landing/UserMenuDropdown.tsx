@@ -131,7 +131,7 @@ export default function UserMenuDropdown({ user, profile }: UserMenuDropdownProp
                   <span>My Appointments</span>
                 </Link>
                 <Link
-                  href="/client/profile"
+                  href="/profile"
                   onClick={() => setIsOpen(false)}
                   className="flex items-center gap-3 px-3 py-2 text-xs text-zinc-300 hover:text-white hover:bg-zinc-800/70 rounded-xl transition-colors"
                 >
@@ -152,15 +152,7 @@ export default function UserMenuDropdown({ user, profile }: UserMenuDropdownProp
                   <span>Barber Appointments</span>
                 </Link>
                 <Link
-                  href="/barber/schedule"
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2 text-xs text-zinc-300 hover:text-white hover:bg-zinc-800/70 rounded-xl transition-colors"
-                >
-                  <Clock className="w-4 h-4 text-amber-400" />
-                  <span>My Schedule</span>
-                </Link>
-                <Link
-                  href="/barber/profile"
+                  href="/profile"
                   onClick={() => setIsOpen(false)}
                   className="flex items-center gap-3 px-3 py-2 text-xs text-zinc-300 hover:text-white hover:bg-zinc-800/70 rounded-xl transition-colors"
                 >
